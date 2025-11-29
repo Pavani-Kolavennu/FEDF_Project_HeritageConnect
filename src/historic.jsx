@@ -1,6 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const HistoricPlaces = () => {
+  const navigate = useNavigate();
+  const [flippedIndex, setFlippedIndex] = useState(null);
+
   const places = [
     {
       name: "Hampi",
@@ -28,27 +32,53 @@ const HistoricPlaces = () => {
     }
   ];
 
-  const showInfo = (info) => alert(info);
+  const flipCard = (index) => {
+    setFlippedIndex(flippedIndex === index ? null : index);
+  };
+
+  const goToDetails = (name) => {
+    navigate(`/details/${encodeURIComponent(name)}`);
+  };
 
   return (
     <div style={styles.body}>
-      <header>
-        <h2 style={styles.header}><i>Heritage Connect</i></h2>
-      </header>
+      <div style={styles.topbar}>
+        <img src="/logo.jpg" alt="logo" style={styles.logo} />
+       
+      </div>
       <h1 style={styles.h1}>Explore Historic Places of India</h1>
       <p style={styles.p}>
         Discover the rich history and heritage of India through its most iconic landmarks. 
         Click on each card to learn more about these historic places.
       </p>
-
-      <div style={styles.places}>
+        <div style={styles.places}>
         {places.map((place, index) => (
-          <div key={index} onClick={() => showInfo(place.info)} style={styles.card}
-            onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
-            onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}>
-            <img src={place.img} alt={place.name} style={styles.img} />
-            <h3 style={styles.h3}>{place.name}</h3>
-            <p style={styles.cardP}>{place.state}</p>
+          <div
+            key={index}
+            style={styles.flipContainer}
+            onClick={() => flipCard(index)}
+          >
+            <div
+              style={{
+                ...styles.flipper,
+                transform:
+                  flippedIndex === index ? "rotateY(180deg)" : "rotateY(0deg)"
+              }}
+            >
+             
+              <div style={styles.front}>
+                <img src={place.img} alt={place.name} style={styles.img} />
+                <h3 style={styles.h3}>{place.name}</h3>
+              </div>
+
+              
+              <div style={styles.back}>
+                <div>
+                  <p style={styles.backText}>{place.info}</p>
+
+                </div>
+              </div>
+            </div>
           </div>
         ))}
       </div>
@@ -58,56 +88,111 @@ const HistoricPlaces = () => {
 
 const styles = {
   body: {
-    fontFamily: "Arial, sans-serif",
-    background: "#f4f6f9",
+    fontFamily: "cambria, Cochin, Georgia, Times, 'Times New Roman', serif",
+    background: "#fdfcfbff",
     padding: "20px",
     textAlign: "center",
-    minHeight: "100vh"
-  },
-  header: {
-    textAlign: "left",
-    fontFamily: "Cambria, Georgia, serif",
-    color: "rgb(118, 12, 122)"
+    minHeight: "100vh",
+    backgroundImage: 'url("/culbg.jpg")',
+    backgroundSize: 'cover',
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center',
+     paddingTop: "120px",
   },
   h1: {
-    color: "#0078d7",
-    marginBottom: "10px"
-  },
-  p: {
-    fontSize: "18px",
-    color: "#444",
-    maxWidth: "700px",
-    margin: "0 auto 30px"
+    color: "#f5f5f5ff",
+    marginBottom: "30px"
   },
   places: {
     display: "flex",
     justifyContent: "center",
     flexWrap: "wrap",
-    gap: "20px"
+    gap: "30px"
   },
-  card: {
+  flipContainer: {
+    perspective: "1000px",
     width: "300px",
+    height: "330px",
+    cursor: "pointer"
+  },
+  flipper: {
+    position: "relative",
+    width: "100%",
+    height: "100%",
+    transformStyle: "preserve-3d",
+    transition: "transform 0.6s"
+  },
+  front: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    backfaceVisibility: "hidden",
     background: "#fff",
     borderRadius: "12px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-    cursor: "pointer",
-    overflow: "hidden",
-    transition: "transform 0.3s"
+    boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
+  },
+  back: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    background: "white",
+    color: "black",
+    transform: "rotateY(180deg)",
+    borderRadius: "12px",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+    backfaceVisibility: "hidden",
+    padding: "10px"
+  },
+  backText: {
+    fontSize: "16px",
+    padding: "10px",
+    overflowWrap: "break-word"
   },
   img: {
     width: "100%",
-    height: "200px",
-    objectFit: "cover"
+    height: "220px",
+    objectFit: "cover",
+    borderTopLeftRadius: "12px",
+    borderTopRightRadius: "12px"
   },
   h3: {
-    margin: "10px 0 5px",
+    marginTop: "10px",
+    fontSize: "20px",
     color: "#0078d7"
   },
-  cardP: {
-    fontSize: "14px",
-    color: "#555",
-    marginBottom: "15px"
-  }
+  
+   topbar: {
+    width: 'auto',
+    height: '100px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    padding: '10px 20px',
+    position: 'fixed',
+    top: '0',
+    left: '0',
+    zIndex: 100
+  },
+  logo: {
+    width: '60px',
+    height: '60px',
+    borderRadius: '50%',
+    marginRight: '15px'
+  },
+  p: {
+  fontSize: '18px',
+  color: 'white',
+  maxWidth: '800px',
+  margin: '0 auto 30px',
+  lineHeight: '1.6',
+  textAlign: 'center',
+  padding: '12px 16px',
+  borderRadius: '8px',
+  boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+}
 };
 
 export default HistoricPlaces;

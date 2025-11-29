@@ -7,17 +7,53 @@ function Signup() {
   const [email, setEmail] = useState("");
   const [phno, setPhno] = useState("");
 
-  
+
   const navigate = useNavigate(); 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  
+  try {
+    const response = await fetch("http://localhost:5000/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: sname,
+        passwd: pwd,
+        email: email,
+        mobileno: phno
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Server responded ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (data && data.success) {
+      alert("Signed up successfully!");
+      // Persist user info locally so Home can find it and avoid redirecting back to signup
+      localStorage.setItem(
+        "formData",
+        JSON.stringify({ name: sname, passwd: pwd, email, mobileno: phno })
+      );
+      navigate("/home");
+      return;
+    }
+    // If server responded but did not return success, show message and fall back
+    if (data && data.message) alert(data.message);
+  } catch (err) {
+    // Backend likely not running or network error — fallback to client-side storage
+    console.warn("Signup backend unavailable, falling back to localStorage:", err.message);
     localStorage.setItem(
       "formData",
       JSON.stringify({ name: sname, passwd: pwd, email, mobileno: phno })
     );
-    alert("Signed up successfully!");
-    navigate("/Home");
-  };
+    alert("Signed up locally (offline). Navigating to Home.");
+    navigate("/home");
+  }
+};
+
 
   return (
     <div>
@@ -26,12 +62,14 @@ function Signup() {
           margin: 0;
           font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
           font-weight: bold;
-          background-image: url('https://cdn.pixabay.com/photo/2020/05/27/12/35/amber-fort-5227035_1280.jpg');
+          background-image: url("bg.png");
           background-size: cover;
+          justify-content: center;
+          align:center;
         }
         h2 {
           text-align: left;
-          color: rgb(118, 12, 122);
+          color: rgba(239, 239, 239, 1);
           margin-left: 20px;
         }
         form {
@@ -71,10 +109,49 @@ function Signup() {
           text-align: center;
           color: black;
         }
+        .header {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+          }
+
+        .logo {
+          width: 60px;
+          height: 60px;
+          border-radius: 100%;  
+          margin-right: 15px;
+        }
+
+    .topbar {
+      width: auto;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;  
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+    }
+
+    .topbar h2 {
+      white-space: nowrap;
+      margin: 0;
+      font-size: 20px;
+      color: rgba(239, 239, 239, 1);
+    }
+         
+}
       `}</style>
 
-      <h2><i>Heritage connect</i></h2>
+ <div className="topbar">
+    <img src="logo.jpg" alt="logo" className="logo" />
+    <h2>Heritage Connect</h2>
+</div>
+
       <form onSubmit={handleSubmit}>
+       
         <label htmlFor="sname">Name:</label>
         <input type="text" id="sname" value={sname} onChange={(e) => setSname(e.target.value)} required />
 
@@ -85,7 +162,7 @@ function Signup() {
         <input type="email" id="emailid" value={email} onChange={(e) => setEmail(e.target.value)} required />
 
         <label htmlFor="phno">Mobile No:</label>
-        <input type="tel" id="phno" value={phno} onChange={(e) => setPhno(e.target.value)} />
+        <input type="tel" id="phno" value={phno} pattern="[0-9]{10}" onChange={(e) => setPhno(e.target.value)} />
 
         <input type="submit" value="Sign up" />
         <h3>
